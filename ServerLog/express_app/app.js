@@ -33,7 +33,8 @@ app.post('/product',(req,res)=>{
 })
 
 app.patch('/product/:id',(req,res)=>{
-    const params = req["params"];
+    // const params = req["params"];
+    const {params} = req;
     const body = req["body"];
     const pid = params.id;
     const toChange = mugs.find((id)=>{
