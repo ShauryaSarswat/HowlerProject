@@ -17,10 +17,10 @@ const mugSchema = new mongoose.Schema({
 
 const mugModel = mongoose.model('PawMugs',mugSchema);
 const testMug = new mugModel({
-    "title":"Paw Mug : The OG Golden Retriever",
+    "title": "Paw Mug : Beagle",
+    "thumbnail": "https://luckysketch.files.wordpress.com/2017/06/mug-beale_mockup_handle-on-right_11oz.png",
+    "description": "The cutest bro",
     "price": 200,
-    "thumbnail":"https://i.ebayimg.com/images/g/DosAAOSwqE9jRVKq/s-l1200.webp",
-    "description": "The best playing partner",
     "discount": 10
 })
 testMug.save().then((res)=>{
