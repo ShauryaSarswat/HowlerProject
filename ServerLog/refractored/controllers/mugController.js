@@ -1,5 +1,8 @@
 const fs = require('fs');
+const mugModel = require('../models/pawModel');
 const fsPromises = require('fs/promises');
+const { error } = require('console');
+const { options } = require('../app');
 const mugs = JSON.parse(fs.readFileSync('./Data/data.json'));
 
 // checking functions 
@@ -30,85 +33,135 @@ module.exports.checkMugBody = (req,res,next) =>{
 }
 
 // non-id functions
-module.exports.addNewMug = (req,res)=>{
-    const {id:reqId, ...data} = req.body;
-    const id = mugs[mugs.length-1].id+1;
-    const newMug = {id:id,...data};
-    fsPromises.writeFile('./Data/data.json',JSON.stringify([...mugs,newMug]));
-    res.status(201);
-    res.send({
-        "status": 201,
-        "body":{
-            "mug": newMug
-        }
-    })
+module.exports.addNewMug = async(req,res)=>{
+    try{
+        const addedMug = await mugModel.create(req.body);
+        res.send({
+            "status":201,
+            "body":{
+                "mug": addedMug
+            }
+        })
+    }
+    catch(err)
+    {
+        console.log(err);
+        res.status(422);
+        res.send({
+            "status": 422,
+            "message": err.message
+        })
+    }
+    
 }
 
-module.exports.getallmugs = (req,res)=>{
-    res.status(200);
-    res.json({
-        "status": 200,
-        "body": {
-            "mugs": mugs
-        }
-    })
+module.exports.getallmugs = async(req,res)=>{
+    try
+    {
+        const allMugs = await mugModel.find();
+        res.status(200);
+        res.json({
+            "status": 200,
+            "body":{
+                "mugs": allMugs
+            }
+        })
+    }
+    catch(err)
+    {
+        console.log(err);
+        res.status(500);
+        res.json({
+            "status": 500,
+            "message": "Internal Server Error"
+        })
+    }
 }
 
 
 // id based functions
 
-module.exports.getmug = (req,res)=>{
-    const {id:mugID} = req.params;
-    const mugIndex = mugs.findIndex(({id})=>id==mugID);
-    const mug = mugs[mugIndex];
-    res.status(200);
-    res.send({
-        "status": 200,
-        "body":{
-            "mug": mug
-        }
-    })
-}
-
-module.exports.deleteMug = (req,res)=>{
-    const {id:mugID} = req.params;
-    const mugIndex = mugs.findIndex(({id})=>id==mugID);
-    const deletedMug = mugs[mugIndex];
-    mugs.splice(mugIndex,1);
-    console.log(deletedMug);
-    fsPromises.writeFile('./Data/data.json',JSON.stringify(mugs));
-    res.status(204);
-    res.send({
-        "status": 204,
-        "body":{
-            "mug": deletedMug
-        }
-    })
-}
-
-module.exports.update = (req,res)=>{
-    const {id:mugID,...data} = req.body;
-    const {id:updateMugID} = req.params;
-    const mugIndex = mugs.findIndex(({id})=>id==updateMugID);
-    const mug = mugs[mugIndex];
-    const updatedMug = { ...data,...mug};
-    console.log(updatedMug)
-    const mugsVector = mugs.map((mug_datapoint)=>{
-        if(mug_datapoint.id==updateMugID)
+module.exports.getmug = async(req,res)=>{
+    try
+    {
+        const {id:mugID} = req.params;
+        const mug = await mugModel.findById(mugID);
+        if(mug)
         {
-            return updatedMug;
+            res.status(200);
+            res.send({
+                "status": 200,
+                "body":{
+                    "mug": mug
+                }
+            })
         }
         else
         {
-            return mug_datapoint;
+            throw new Error("Mug not found");
         }
-    })
-    fsPromises.writeFile('./Data/data.json',JSON.stringify(mugsVector));
-    res.status(201);
-    res.send({
-        "status": 201,
-        "body": {
-            "mug": updatedMug
-        }
-    })
+    }
+    catch(err)
+    {
+        res.status(404);
+        res.send({
+            "status": 404,
+            "message": "Paw mug not found"
+        })
+    }
+    
+}
+
+module.exports.deleteMug = async(req,res)=>{
+    try
+    {
+        const {id:mugID} = req.params;
+        const deletedMug = await mugModel.findOneAndDelete({
+            "_id":mugID
+        });
+        res.status(200);
+        res.json({
+            "status": 200,
+            "body":{
+                "mugs": deletedMug
+            }
+        })
+    }
+    catch(err)
+    {
+        res.status(400)
+        res.json({
+            "status": 400,
+            "message": "Bad Request"
+        })
+    }
+}
+
+module.exports.update = async(req,res)=>{
+    try
+    {
+        const {id:mugID} = req.params;
+        const {_id,__v,...body} = req.body;
+        const updatedMug = await mugModel.findByIdAndUpdate({
+            "_id":mugID
+        },body,{
+            new: true
+          });
+
+        res.status(201);
+        res.send({
+            "status": 201,
+            "body": {
+                "mug": updatedMug
+            }
+        })
+    }
+    catch(err)
+    {
+        res.status(404);
+        res.send({
+            "status": 404,
+            "message": "Bad Request"
+        })
+    }
 }

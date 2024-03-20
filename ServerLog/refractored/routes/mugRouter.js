@@ -11,7 +11,7 @@ mugRouter
     .get(mugController.getallmugs)
     .post(mugController.checkMugBody,mugController.addNewMug)
 
-mugRouter.param('id',(mugController.checkMugID));
+// mugRouter.param('id',(mugController.checkMugID));
 
 mugRouter
     .route('/:id')
