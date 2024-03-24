@@ -3,6 +3,7 @@ const mugModel = require('../models/pawModel');
 const fsPromises = require('fs/promises');
 const { error } = require('console');
 const { options } = require('../app');
+const { query } = require('express');
 const mugs = JSON.parse(fs.readFileSync('./Data/data.json'));
 
 // checking functions 
@@ -58,7 +59,22 @@ module.exports.addNewMug = async(req,res)=>{
 module.exports.getallmugs = async(req,res)=>{
     try
     {
-        const allMugs = await mugModel.find();
+        const queryParams = req.query;
+        const {sort,fields,page,limit,...filters} = queryParams;
+        console.log(sort+" "+fields+" "+page+" "+limit+" "+filters);
+        let allMugs = await mugModel.find(filters);
+        if(sort)
+        {
+            const sortingParams = sort.split(",").join(" ");
+            allMugs.sort(sortingParams);
+        }
+        if(fields)
+        {
+            const fieldParams = fields.split(",").join(" ");
+            allMugs.select(fieldParams);
+        }
+        const docstoskip = (page-1)*limit;
+        allMugs = allMugs.skip(docstoskip)
         res.status(200);
         res.json({
             "status": 200,
