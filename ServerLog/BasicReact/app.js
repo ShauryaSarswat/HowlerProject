@@ -28,3 +28,8 @@ import ReactDOM from 'react-dom';
 // const ol = obj.createElement("ol",{},[li,li2,li3,li4,li5])
 // const normalDiv = obj.createElement("div",{},[h1,h2,ol]);
 // root.render(normalDiv);
+
+const heading = <h1 className='black-mamba'>{document.querySelector("#root").setAttribute("class","the_parent")} this is a sample that we are doing</h1>;
+const parent = document.querySelector("#root");
+const root = ReactDOM.createRoot(parent);
+root.render(heading)
