@@ -30,6 +30,11 @@ import ReactDOM from 'react-dom';
 // root.render(normalDiv);
 
 const heading = <h1 className='black-mamba'>{document.querySelector("#root").setAttribute("class","the_parent")} this is a sample that we are doing</h1>;
+const sec = ()=>{
+    return {
+        heading
+    }
+}
 const parent = document.querySelector("#root");
 const root = ReactDOM.createRoot(parent);
-root.render(heading)
+root.render(sec)
